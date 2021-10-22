@@ -11,10 +11,24 @@ client = discord.Client()
 my_secret = os.environ['TOKEN']
 
 # List of all scholars and ronin addresses
-ronin = {'karl':'ronin:0e2b59addf4e324b3a0c26b62280aa270d00f729','reynald':'ronin:84eca762ecdd0c388c3c9a70baf4b9317241f390', 'janjan':'ronin:a5fd8015eb88bac5fbffc074449585307de8f724', 'janrae':'ronin:752e5f460768fb0f6cadd24f06b23ce34976dc37', 'keo':'ronin:55ba81d5f2e6cdaafc56387e5b8c6f4763e7ee78', 'tracy':'ronin:3e69081f866520b56e2684e14e76243406960e78', 'jinky':'ronin:16e2a8e8ea64f3bafae970549f205925afb7f000'}
+ronin = {'karl':'ronin:0e2b59addf4e324b3a0c26b62280aa270d00f729','reynald':'ronin:a5fd8015eb88bac5fbffc074449585307de8f724', 'janjan':'ronin:3bd8d200ef6d1b82f7c2ddfe6d89fedc5283354c', 'janrae':'ronin:752e5f460768fb0f6cadd24f06b23ce34976dc37', 'keo':'ronin:55ba81d5f2e6cdaafc56387e5b8c6f4763e7ee78', 'tracy':'ronin:3e69081f866520b56e2684e14e76243406960e78', 'jinky':'ronin:16e2a8e8ea64f3bafae970549f205925afb7f000','mylene':'ronin:7b672737002ffc73053306ec95f6cf5287cfeff0','mitz':'ronin:d19e39fb2c4433bd87165be313782819cee1a911','erning':'ronin:84eca762ecdd0c388c3c9a70baf4b9317241f390',
+'jane':'ronin:4a3425af83b89556b84a145173d450b0ab657990'}
 
 # List of scholar names to be used for the bot commands
-scholars = ["jinky", "janjan", "janrae", "keo", "karl", "tracy", "reynald"]
+scholars = ["jinky", "janjan", "janrae", "keo", "karl", "tracy", "reynald","mylene","mitz","erning","jane"]
+
+# Get report for the manager based on ronin address
+def get_mgr_report():
+  partner_report = ""
+
+  for partners in ronin:
+    response = requests.get("https://api.lunaciaproxy.cloud/_stats/"+ronin[partners])
+    json_data = json.loads(response.text)
+    mmr = json_data['stats']['elo']
+    next_withdraw = get_next_withdraw(ronin[partners])
+    partner_report += str(partners) + " --> MMR : " + str(mmr) + " --> Next Widthdraw : " + next_withdraw + "\n"
+
+  return partner_report
 
 # Get the SLP based on the ronin address
 def get_current_slp(ronin_id):
@@ -105,5 +119,9 @@ async def on_message(message):
 
   if msg.startswith('$partners'):
     await message.channel.send(scholars)  
+  
+  if msg.startswith('$report'):
+    get_report = get_mgr_report()
+    await message.channel.send(get_report)
 
 client.run(my_secret)
